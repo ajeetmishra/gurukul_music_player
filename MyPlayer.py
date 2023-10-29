@@ -2,6 +2,10 @@ import vlc
 import time
 from utils_logger import logger
 
+# Instantiate Telegram bot
+# from Telegrammer import Telegrammer
+# tg = Telegrammer()
+
 class MyPlayer:
     def __init__(self, musicFileObj): 
         self.musicFileObj = musicFileObj
@@ -20,7 +24,9 @@ class MyPlayer:
         from datetime import datetime
         endTime = self.musicFileObj.fileTimeslot[1]
         endTime = datetime.strftime(endTime, "%I.%M %p")
-        logger.info(f'Playing file "{self.musicFile}". End time is {endTime}')
+        msg = f'Playing file "{self.musicFile}". End time is {endTime}'
+        logger.info(msg)
+        # tg.sendMessage(msg)
         self.player.play()
 
         time.sleep(1)
