@@ -2,24 +2,32 @@ from MusicFileList import MusicFileList
 from MusicFile import MusicFile
 from utils_logger import logger
 from MyPlayer import MyPlayer
-import time
+import os, time
+from pathlib import Path
+import portalocker
 
 # Create a temp file if not exists
-with open("singleton", "a") as f:
-    # Enter the current datetime in the file
-    f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+##path = Path('./singleton')
+##    
+##if path.exists() == False:
+##    with open("singleton", "a") as f:
+##        # Enter the current datetime in the file
+##        f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')}\n")
 
 # Open the file again - as a lock to prevent multiple instances
+logger.info(f"{os.getpid()} - Locking Singleton...")
+lock1 = portalocker.Lock('singleton')
 try:
-    open("singleton", "w") 
-except IOError:
-    logger.error("Another instance is already running. Exiting...")
-    exit(0)
+    if lock1.acquire():
+        logger.info(f"{os.getpid()} - Singleton lock acquired.")
+except portalocker.exceptions.LockException:
+    logger.error(f"{os.getpid()} - Singleton lock failed. Another instance is already running.")
+    import sys; sys.exit()
 
 # Start logging of new instance/session
-logger.info(f'{"*"*10} New instance/session started {"*"*10}')
+logger.info(f'{os.getpid()} - {"*"*10} New instance/session started {"*"*10}')
 
-libraryPath = r"d:\library music"
+libraryPath = r"f:\library music"
 waitTimeForNewFile = 30
 
 while True:
@@ -40,7 +48,7 @@ while True:
             time.sleep(60)
 
     # Initialize MusicFileList
-    mList = MusicFileList(libraryPath, randomize=True)
+    mList = MusicFileList(libraryPath, randomize=False)
     logger.info(mList)
 
     # Get files eligible to play now
