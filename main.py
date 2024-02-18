@@ -6,14 +6,6 @@ import os, time
 from pathlib import Path
 import portalocker
 
-# Create a temp file if not exists
-##path = Path('./singleton')
-##    
-##if path.exists() == False:
-##    with open("singleton", "a") as f:
-##        # Enter the current datetime in the file
-##        f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')}\n")
-
 # Open the file again - as a lock to prevent multiple instances
 logger.info(f"{os.getpid()} - Locking Singleton...")
 lock1 = portalocker.Lock('singleton')
@@ -29,23 +21,48 @@ logger.info(f'{os.getpid()} - {"*"*10} New instance/session started {"*"*10}')
 
 libraryPath = r"f:\library music"
 waitTimeForNewFile = 30
+sleepyFromTime = "2215"
+sleepyToTime = "0600"
+sleepyVolume = 30
+
+
+def parse_time(time_str):
+    """Convert a string in format "HHMM" to a time object"""
+    from datetime import time
+    return time(int(time_str[:2]), int(time_str[2:]))
+
+
+def is_time_between(begin_time_str, end_time_str):
+    """Checks if current time is between two given time points. Returns bool."""
+
+    from datetime import datetime
+    begin_time = parse_time(begin_time_str)
+    end_time = parse_time(end_time_str)
+    current_time = datetime.now().time()
+
+    if begin_time < end_time:
+        return begin_time <= current_time <= end_time
+    else:
+        # Handles cases where the range crosses midnight (e.g., 10 PM to 4 AM)
+        return begin_time <= current_time or current_time < end_time
+
 
 while True:
     
-    # While the current time is before 6 AM, wait for 1 min
-    while time.localtime().tm_hour < 6:
-        logger.info(f"Current time is before 6 AM. {time.strftime('%I:%M %p')}. Waiting for 1 minute")
-        time.sleep(60)
-    
-    # If current time is after 10:15 PM, wait for 1 min
-    import datetime
-    while True:
-        today = datetime.datetime.today()
-        if datetime.datetime.now() < datetime.datetime.combine(today, datetime.time(22, 15)):
-            break
-        else:
-            logger.info(f"Current time is after 10:15 PM. {time.strftime('%I:%M %p')}. Waiting for 1 minute")
-            time.sleep(60)
+##    # While the current time is before 6 AM, wait for 1 min
+##    while time.localtime().tm_hour < 6:
+##        logger.info(f"Current time is before 6 AM. {time.strftime('%I:%M %p')}. Waiting for 1 minute")
+##        time.sleep(60)
+##    
+##    # If current time is after 10:15 PM, wait for 1 min
+##    import datetime
+##    while True:
+##        today = datetime.datetime.today()
+##        if datetime.datetime.now() < datetime.datetime.combine(today, datetime.time(22, 15)):
+##            break
+##        else:
+##            logger.info(f"Current time is after 10:15 PM. {time.strftime('%I:%M %p')}. Waiting for 1 minute")
+##            time.sleep(60)
 
     # Initialize MusicFileList
     mList = MusicFileList(libraryPath, randomize=False)
@@ -66,6 +83,13 @@ while True:
     for musicFile in filesToPlay:
         mp = MyPlayer(musicFile)
         
-        # if musicFile.fileTimeslot[1].hour < 23:
+        if is_time_between(sleepyFromTime, sleepyToTime):
+            logger.info(f"Volume reduced to {sleepyVolume}%")
+            mp.setVolume(sleepyVolume)
+        else:
+            logger.info(f"Volume reset to 100%")
+            mp.setVolume(100)
+
+            
         logger.info(f"Playing file {musicFile.fileObj}")
         playingStatus = mp.play()
