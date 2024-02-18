@@ -31,7 +31,9 @@ class MyPlayer:
 
         time.sleep(1)
         if not self.player.is_playing():
-            logger.error(f'File {self.musicFile} is not playing.')
+            logger.warning(f'File {self.musicFile} is not playing. Stopping player')
+            self.player.stop()
+            logger.info(f'Stopped player.')
             return
         
         while True:
@@ -45,3 +47,13 @@ class MyPlayer:
                 logger.info(f"Stopping to play file {self.musicFile}")
                 self.player.stop()
                 break
+
+
+    def setVolume(self, volumeLevel=100):
+        """Set the volume level"""
+        self.player.audio_set_volume(volumeLevel)
+
+
+    def setVideoScale(videoScale=0.3):
+        """Set video scale"""
+        self.player.video_set_scale(videoScale)
