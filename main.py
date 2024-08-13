@@ -19,12 +19,19 @@ except portalocker.exceptions.LockException:
 # Start logging of new instance/session
 logger.info(f'{os.getpid()} - {"*"*10} New instance/session started {"*"*10}')
 
-libraryPath = r"f:\library music"
+libraryPath = r"f:\library music month"
 waitTimeForNewFile = 30
 sleepyFromTime = "2215"
 sleepyToTime = "0600"
 sleepyVolume = 30
 
+# Get month-name to start
+monthname = ""
+while monthname.strip().upper() not in ['A', 'B']:
+    monthname = input("Enter month (A or B):")
+
+libraryPath += monthname.strip().upper()
+print(f"Playing from folder: {libraryPath}")
 
 def parse_time(time_str):
     """Convert a string in format "HHMM" to a time object"""
@@ -49,21 +56,6 @@ def is_time_between(begin_time_str, end_time_str):
 
 while True:
     
-##    # While the current time is before 6 AM, wait for 1 min
-##    while time.localtime().tm_hour < 6:
-##        logger.info(f"Current time is before 6 AM. {time.strftime('%I:%M %p')}. Waiting for 1 minute")
-##        time.sleep(60)
-##    
-##    # If current time is after 10:15 PM, wait for 1 min
-##    import datetime
-##    while True:
-##        today = datetime.datetime.today()
-##        if datetime.datetime.now() < datetime.datetime.combine(today, datetime.time(22, 15)):
-##            break
-##        else:
-##            logger.info(f"Current time is after 10:15 PM. {time.strftime('%I:%M %p')}. Waiting for 1 minute")
-##            time.sleep(60)
-
     # Initialize MusicFileList
     mList = MusicFileList(libraryPath, randomize=False)
     logger.info(mList)
@@ -91,5 +83,5 @@ while True:
             mp.setVolume(100)
 
             
-        logger.info(f"Playing file {musicFile.fileObj}")
+        # logger.info(f"Playing file {musicFile.fileObj}")
         playingStatus = mp.play()
